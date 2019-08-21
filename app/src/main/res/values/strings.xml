@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">VCORE SMS Bulk</string>
+
+    <string-array name="array_delay">
+        <item>10 seg</item>
+        <item>15 seg</item>
+        <item>20 seg</item>
+    </string-array>
 </resources>

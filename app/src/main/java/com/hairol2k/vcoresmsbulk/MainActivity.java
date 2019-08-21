@@ -6,13 +6,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "ActiveMQ";
     private static final String CLIENT_ID = "ExampleAndroidClient";
 
-    private String SERVER_URI; 
+    private String SERVER_URI;
     private String USERNAME;
     private String PASSWORD;
     private String SUBSCRIBE_TOPIC;
@@ -56,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton bt_toggle_save_config;
     private Button btn_hide_save_config;
     private Button btn_Save_config;
+
+    private  int TimeDelay = 10;
+    final Handler handler = new Handler();
+    private Spinner spinnerDelay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,10 +94,16 @@ public class MainActivity extends AppCompatActivity {
         USERNAME = Preference.getServerUser(getApplicationContext());
         PASSWORD = Preference.getServerPass(getApplicationContext());
         SUBSCRIBE_TOPIC = Preference.getQueueName(getApplicationContext());
+        TimeDelay  = Preference.getDelay(getApplicationContext());
         serverName.setText(SERVER_URI);
         user.setText(USERNAME);
         pass.setText(PASSWORD);
         queueName.setText(SUBSCRIBE_TOPIC);
+
+        if(TimeDelay == 10) spinnerDelay.setSelection(0);
+        if(TimeDelay == 15) spinnerDelay.setSelection(1);
+        if(TimeDelay == 20) spinnerDelay.setSelection(2);
+
     }
 
     private void savePreference() {
@@ -96,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         Preference.setServerUser(getApplicationContext(), user.getText().toString());
         Preference.setServerPass(getApplicationContext(), pass.getText().toString());
         Preference.setQueueName(getApplicationContext(), queueName.getText().toString());
+        Preference.setDelay(getApplicationContext(), TimeDelay);
     }
 
     private boolean validateConfig() {
@@ -132,6 +148,22 @@ public class MainActivity extends AppCompatActivity {
         txtStatus = (TextView) findViewById(R.id.txtStatus);
         animation_view = (LottieAnimationView) findViewById(R.id.animation_view);
 
+        spinnerDelay =(Spinner)findViewById(R.id.cmbDelayTime);
+        spinnerDelay.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                if(position == 0)TimeDelay = 10;
+                if(position == 1)TimeDelay = 15;
+                if(position == 2)TimeDelay = 20;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+        });
+
+
         swPowerONOF = (Switch) findViewById(R.id.swPowerONOF);
         disconnectMQUI("Desconectado");
 
@@ -145,7 +177,6 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         swPowerONOF.setChecked(false);
                         Snackbar.make(findViewById(android.R.id.content), "Rellenar valores requeridos en configuración", Snackbar.LENGTH_SHORT).show();
-
                     }
 
                 } else {
@@ -254,22 +285,29 @@ public class MainActivity extends AppCompatActivity {
             clientMQ.subscribe(SUBSCRIBE_TOPIC, 0, new IMqttMessageListener() {
                 @Override
                 public void messageArrived(final String topic, final MqttMessage message) throws Exception {
-                    runOnUiThread(new Runnable() {
+
+                    handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
 
-                            if(!message.toString().isEmpty()){
-                                Gson gson = new Gson();
-                                Message object = gson.fromJson(message.toString(), Message.class);
+                                    if(!message.toString().isEmpty()){
+                                        Gson gson = new Gson();
+                                        Message object = gson.fromJson(message.toString(), Message.class);
+                                        String SENT = "SMS_SENT";
+                                        PendingIntent sentPI = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(SENT), 0);
+                                        SmsManager.getDefault().sendTextMessage(object.getPhone(), null, object.getMessage(), sentPI, null);
+                                        Toast.makeText(MainActivity.this, message.toString(), Toast.LENGTH_SHORT).show();
+                                    }else{
+                                        Toast.makeText(MainActivity.this, "El mensaje esta vacio", Toast.LENGTH_SHORT).show();
+                                    }
 
-                                SmsManager.getDefault().sendTextMessage(object.getPhone(), null, object.getMessage(), null, null);
-                                Toast.makeText(MainActivity.this, message.toString(), Toast.LENGTH_SHORT).show();
-                            }else{
-                                Toast.makeText(MainActivity.this, "El mensaje esta vacio", Toast.LENGTH_SHORT).show();
-                            }
-
+                                }
+                            });
                         }
-                    });
+                    }, TimeDelay*1000);
                 }
             });
         } catch (MqttException e) {

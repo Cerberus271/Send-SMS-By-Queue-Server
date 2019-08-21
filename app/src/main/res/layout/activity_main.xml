@@ -73,13 +73,12 @@
                 <EditText
                     android:id="@+id/txtServerName"
                     android:inputType="textMultiLine"
-                    android:lines="4"
+                    android:lines="2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="15dp"
-                    android:layout_marginBottom="10dp"
                     android:background="@color/grey_5"
                     android:gravity="center_vertical"
                     android:hint="URL de cola"
@@ -93,19 +92,11 @@
                     android:layout_marginLeft="15dp"
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="15dp"
-                    android:layout_marginBottom="10dp"
+                    android:padding="10dp"
                     android:background="@color/grey_5"
                     android:gravity="center_vertical"
                     android:hint="Nombre de cola"
-                    android:padding="10dp"
                     android:textColor="@color/grey_60" />
-
-             <!--   <androidx.appcompat.widget.AppCompatCheckBox
-                    android:id="@+id/checkStatusAuth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
-                    android:text="Autenticación" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -141,6 +132,26 @@
                         android:padding="10dp"
                         android:textColor="@color/grey_60" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginRight="15dp"
+                    android:padding="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="Tiempo de espera"
+                    android:layout_height="wrap_content"/>
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/cmbDelayTime"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginBottom="10dp"
+                    android:padding="10dp"
+                    android:drawSelectorOnTop="true"
+                    android:entries="@array/array_delay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
 
                 <View
                     android:layout_width="match_parent"

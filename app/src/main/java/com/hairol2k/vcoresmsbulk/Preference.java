@@ -69,4 +69,18 @@ public class Preference {
         editor.putString("QueueName",QueueName);
         editor.commit();
     }
+
+    public static int getDelay(Context ctx) {
+
+        SharedPreferences settings = ctx.getSharedPreferences("Delay", 0);
+        return settings.getInt("Delay", 0);
+    }
+
+    public static void setDelay(Context ctx, int Delay) {
+
+        SharedPreferences settings = ctx.getSharedPreferences("Delay", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt("Delay",Delay);
+        editor.commit();
+    }
 }
